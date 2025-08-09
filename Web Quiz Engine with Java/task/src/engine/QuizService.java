@@ -3,6 +3,7 @@ package engine;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -36,7 +37,12 @@ public class QuizService {
         return result;
     }
 
-    public boolean checkAnswer(int quizId, int result) {
-        return getById(quizId).getAnswer() == result;
+    public boolean checkAnswer(int quizId, List<Integer> result) {
+        var answers = getById(quizId).getAnswer();
+        if (answers == null) {
+            answers = List.of();
+        }
+        var realAnswer = new HashSet<>(answers);
+        return realAnswer.containsAll(result) && result.size() == realAnswer.size();
     }
 }

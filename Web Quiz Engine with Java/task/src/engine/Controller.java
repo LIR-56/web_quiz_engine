@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class Controller {
 
     @RequestMapping(value = "/api/quizzes", method = RequestMethod.POST)
     public String addQuiz(
-            @RequestBody Quiz quiz
+            @RequestBody @Validated Quiz quiz
     ) throws JsonProcessingException {
         int id = quizService.addQuiz(quiz);
         return om.writeValueAsString(QuizResponse.fromQuiz(id , quiz));
@@ -59,9 +60,9 @@ public class Controller {
     @RequestMapping(value = "/api/quizzes/{id}/solve", method = RequestMethod.POST)
     public String solve(
             @PathVariable @NonNull Integer id,
-            @RequestParam @NonNull Integer answer
+            @RequestBody @NonNull AnswerWrapper answerWrapper
     ) {
-        if (quizService.checkAnswer(id, answer)) {
+        if (quizService.checkAnswer(id, answerWrapper.answer)) {
             return correctAnswer;
         } else {
             return wrongAnswer;
@@ -69,6 +70,7 @@ public class Controller {
     }
 
     private record AnswerResponse(@JsonProperty("success") boolean success, String feedback) {}
+    public record AnswerWrapper(@NonNull List<Integer> answer) {}
     private record QuizResponse(int id, String title, String text, List<String> options) {
 
         static QuizResponse fromQuiz(int id, Quiz quiz) {
