@@ -8,32 +8,31 @@ import java.util.List;
 
 @Component
 public class QuizService {
-    private final ArrayList<Quiz> quizzes;
 
-    public QuizService() {
-        this.quizzes = new ArrayList<>();
+    private final QuizMapper quizMapper;
+    private final QuizRepository quizRepository;
+
+    public QuizService(QuizMapper quizMapper, QuizRepository quizRepository) {
+        this.quizMapper = quizMapper;
+        this.quizRepository = quizRepository;
     }
 
-    public int addQuiz(Quiz quiz) {
-        synchronized (quizzes) {
-            quizzes.add(quiz);
-            return quizzes.size() - 1;
-        }
+    public long addQuiz(Quiz quiz) {
+        var dto = quizMapper.convertQuizToDTO(quiz);
+        quizRepository.save(dto);
+        return dto.getId();
     }
 
-    public Quiz getById(int id) {
-        if (quizzes.size() > id && quizzes.get(id) != null) {
-            return quizzes.get(id);
-        }
-        throw new QuizNotFoundException(id);
+    public Quiz getById(long id) {
+            var founded = quizRepository.findById(id).orElseThrow(() -> new QuizNotFoundException(id));
+            return quizMapper.convertDTOtoQuiz(founded);
     }
 
-    public List<Quiz> getAllQuizes() {
-        ArrayList<Quiz> result;
-
-        synchronized (quizzes) {
-            result = (ArrayList<Quiz>) quizzes.clone();
-        }
+    public List<Quiz> getAllQuizzes() {
+        var result = new ArrayList<Quiz>();
+        quizRepository.findAll().forEach(
+                quizDTO -> result.add(quizMapper.convertDTOtoQuiz(quizDTO))
+        );
         return result;
     }
 

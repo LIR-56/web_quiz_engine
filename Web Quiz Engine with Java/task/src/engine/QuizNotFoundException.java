@@ -1,14 +1,14 @@
 package engine;
 
 public class QuizNotFoundException extends RuntimeException {
-    private final int id;
+    private final long id;
 
-    public QuizNotFoundException(int id) {
+    public QuizNotFoundException(long id) {
         super();
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 }

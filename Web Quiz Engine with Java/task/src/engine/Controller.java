@@ -36,7 +36,7 @@ public class Controller {
     public String addQuiz(
             @RequestBody @Validated Quiz quiz
     ) throws JsonProcessingException {
-        int id = quizService.addQuiz(quiz);
+        long id = quizService.addQuiz(quiz);
         return om.writeValueAsString(QuizResponse.fromQuiz(id , quiz));
     }
 
@@ -48,11 +48,11 @@ public class Controller {
     }
 
     @RequestMapping(value = "/api/quizzes", method = RequestMethod.GET)
-    public String getAllQuizes() throws JsonProcessingException {
+    public String getAllQuizzes() throws JsonProcessingException {
         var result = new ArrayList<QuizResponse>();
-        var quizzes = quizService.getAllQuizes();
-        for (int i = 0; i < quizzes.size(); i++) {
-            result.add(QuizResponse.fromQuiz(i, quizzes.get(i)));
+        var quizzes = quizService.getAllQuizzes();
+        for (Quiz quiz : quizzes) {
+            result.add(QuizResponse.fromQuiz(quiz.getId(), quiz));
         }
         return om.writeValueAsString(result);
     }
@@ -71,9 +71,9 @@ public class Controller {
 
     private record AnswerResponse(@JsonProperty("success") boolean success, String feedback) {}
     public record AnswerWrapper(@NonNull List<Integer> answer) {}
-    private record QuizResponse(int id, String title, String text, List<String> options) {
+    private record QuizResponse(long id, String title, String text, List<String> options) {
 
-        static QuizResponse fromQuiz(int id, Quiz quiz) {
+        static QuizResponse fromQuiz(long id, Quiz quiz) {
             return new QuizResponse(id, quiz.getTitle(), quiz.getText(), quiz.getOptions());
         }
     }
